@@ -1,20 +1,8 @@
-const express = require("express");
-const app = express();
-
 const logger = require("morgan");
+const db = require("../models");
 const Workout = require("../models/schema");
 
 module.exports = function (app) {
-
-    app.get("/", (req, res) => {
-        db.workoutSeed.find({})
-            .then(dbNote => {
-                res.json(dbNote);
-            })
-            .catch(err => {
-                res.json(err);
-            });
-    });
 
     app.get("/api/workouts" , (req, res) => {
         
@@ -39,11 +27,11 @@ module.exports = function (app) {
     });
 
 
-    app.post("/exercise?", ({ body }, res) => {
+    app.post("/exercise/:id", ({ body }, res) => {
        
     });
 
-
+    // New Workout
     app.post("/exercise", ({ body }, res) => {
         const exercise = new Workout(body);
         // User.setTotalDuration();
