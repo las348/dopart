@@ -1,15 +1,10 @@
-const db = require("./models");
 const express = require("express");
+const app = express();
+
 const logger = require("morgan");
+const Workout = require("../models/schema");
 
 module.exports = function (app) {
-    db.workoutSeed.create({ name: "Campus Library" })
-    .then(dbLibrary => {
-      console.log(dbLibrary);
-    })
-    .catch(({message}) => {
-      console.log(message);
-    });
 
     app.get("/", (req, res) => {
         db.workoutSeed.find({})
@@ -19,6 +14,17 @@ module.exports = function (app) {
             .catch(err => {
                 res.json(err);
             });
+    });
+
+    app.get("/api/workouts" , (req, res) => {
+        
+        db.Workout.find({})
+        .then(dbWorkout => {
+            res.json(dbWorkout);
+        })
+        .catch(err => {
+            res.status(400).json(err)
+        });
     });
 
 
@@ -34,25 +40,21 @@ module.exports = function (app) {
 
 
     app.post("/exercise?", ({ body }, res) => {
-        db.workoutSeed.create(body)
-            .then(({ _id }) => db.User.findOneAndUpdate({}, { $push: { notes: _id } }, { new: true }))
-            .then(dbUser => {
-                res.json(dbUser);
-            })
-            .catch(err => {
-                res.json(err);
-            });
+       
     });
 
 
     app.post("/exercise", ({ body }, res) => {
-        db.workoutSeed.create(body)
-            .then(({ _id }) => db.User.findOneAndUpdate({}, { $push: { notes: _id } }, { new: true }))
-            .then(dbUser => {
-                res.json(dbUser);
+        const exercise = new Workout(body);
+        // User.setTotalDuration();
+
+        Workout.create(exercise)
+            .then(dbWorkout => {
+                res.json(dbWorkout);
             })
             .catch(err => {
                 res.json(err);
             });
     });
+
 };
