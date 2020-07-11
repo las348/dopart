@@ -1,48 +1,62 @@
-const logger = require("morgan");
 const db = require("../models");
-const Workout = require("../models/schema");
+const path = require("path")
+const logger = require("morgan");
 
 module.exports = function (app) {
 
-    app.get("/api/workouts" , (req, res) => {
-        
-        db.Workout.find({})
-        .then(dbWorkout => {
-            res.json(dbWorkout);
-        })
-        .catch(err => {
-            res.status(400).json(err)
+    //Last workout
+    app.get("/api/workouts", (req, res) => {
+        console.log("Last workout")
+
+        db.Workout.find({}, (error, data) => {
+            if (error) {
+                res.send(error);
+            } else {
+                res.json(data);
+            }
         });
     });
 
+    // Add exercise
+    app.put("/api/workouts/:id", (req, res) => {
+        console.log("add exercise")
 
-    app.get("/stats", (req, res) => {
-        db.workoutSeed.find({})
-            .then(dbNote => {
-                res.json(dbNote);
-            })
-            .catch(err => {
-                res.json(err);
-            });
+        db.Workout.update(
+            {
+                _id: mongojs.ObjectId(req.params.id)
+            },
+            {
+                $set: {
+                    exercises: req.body,
+                    modified: Date.now()
+                }
+            },
+            (error, data) => {
+                if (error) {
+                    res.send(error);
+                } else {
+                    res.send(data);
+                }
+            }
+        );
     });
 
 
-    app.post("/exercise/:id", ({ body }, res) => {
-       
-    });
-
-    // New Workout
-    app.post("/exercise", ({ body }, res) => {
-        const exercise = new Workout(body);
-        // User.setTotalDuration();
-
-        Workout.create(exercise)
+    // Create Workout
+    app.post("/api/workouts", ({ body }, res) => {
+        console.log("create workout");
+        
+        const workout = new db.Workout(body);
+        db.Workout.create(workout)
             .then(dbWorkout => {
+                console.log(dbWorkout)
                 res.json(dbWorkout);
             })
-            .catch(err => {
-                res.json(err);
-            });
+            if (error) {
+                res.send(error);
+            } else {
+                res.send(data);
+            }
     });
 
-};
+}
