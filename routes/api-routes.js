@@ -1,6 +1,6 @@
 const db = require("../models");
-const path = require("path")
 const logger = require("morgan");
+
 
 module.exports = function (app) {
 
@@ -8,55 +8,59 @@ module.exports = function (app) {
     app.get("/api/workouts", (req, res) => {
         console.log("Last workout")
 
-        db.Workout.find({}, (error, data) => {
-            if (error) {
-                res.send(error);
-            } else {
-                res.json(data);
-            }
-        });
+        db.Workout.find()
+        .then(dbWorkout => {
+            res.json(dbWorkout);
+        })
+        .catch(err => {
+            res.json(err);
+          });
     });
 
     // Add exercise
+    // findOneAndUpdate(conditions, update, callback) 
     app.put("/api/workouts/:id", (req, res) => {
         console.log("add exercise")
 
-        db.Workout.update(
+        db.Workout.findOneAndUpdate({_id: req.params.id},
             {
-                _id: mongojs.ObjectId(req.params.id)
-            },
-            {
-                $set: {
+                $push: {
                     exercises: req.body,
                     modified: Date.now()
                 }
-            },
-            (error, data) => {
-                if (error) {
-                    res.send(error);
-                } else {
-                    res.send(data);
-                }
-            }
-        );
-    });
-
-
-    // Create Workout
-    app.post("/api/workouts", ({ body }, res) => {
-        console.log("create workout");
-        
-        const workout = new db.Workout(body);
-        db.Workout.create(workout)
+            }, { new: true })
             .then(dbWorkout => {
-                console.log(dbWorkout)
                 res.json(dbWorkout);
-            })
-            if (error) {
-                res.send(error);
-            } else {
-                res.send(data);
-            }
+              })
+              .catch(err => {
+                res.json(err);
+              });
     });
+
+ 
+    // Create Workout
+    app.post("/api/workouts", ({body}, res) => {
+        console.log("create workout");
+
+        db.Workout.create(body)
+        .then(dbWorkout => {
+            res.json(dbWorkout);
+          })
+          .catch(err => {
+            res.json(err);
+          });
+    });
+
+    app.get("/api/workouts/range", (req, res) => {
+       
+        db.Workout.find({}).limit(7)
+        .then(dbWorkout => {
+            res.json(dbWorkout);
+        })
+        .catch(err => {
+            res.json(err);
+        });
+        
+    })
 
 }
